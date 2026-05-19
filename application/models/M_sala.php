@@ -16,18 +16,12 @@ class M_sala extends CI_Model {
 
     public function inserir($codigo, $descricao, $andar, $capacidade) {
         try {
-
-            // Verifica se a sala já está cadastrada
             $retornoConsulta = $this->consultarSala($codigo);
 
             if ($retornoConsulta['codigo'] != 9 &&
                 $retornoConsulta['codigo'] != 10) {
-
-                // Query de inserção
                 $this->db->query("insert into tbl_sala (codigo, descricao, andar, capacidade)
                                   values ($codigo, '$descricao', $andar, $capacidade)");
-
-                // Verifica se a inserção ocorreu com sucesso
                 if ($this->db->affected_rows() > 0) {
                     $dados = array(
                         'codigo' => 1,
@@ -56,8 +50,6 @@ class M_sala extends CI_Model {
 
         return $dados;
     }
-
-    // Método privado — só usado dentro desta classe
     private function consultarSala($codigo) {
         try {
 
@@ -97,8 +89,6 @@ class M_sala extends CI_Model {
 
     public function consultar($codigo, $descricao, $andar, $capacidade) {
         try {
-
-            // Query base — traz só salas ativas
             $sql = "select * from tbl_sala where estatus = '' ";
 
             // Adiciona filtros dinamicamente conforme o que foi passado
@@ -121,8 +111,6 @@ class M_sala extends CI_Model {
             $sql = $sql . " order by codigo ";
 
             $retorno = $this->db->query($sql);
-
-            // Verifica se encontrou registros
             if ($retorno->num_rows() > 0) {
                 $dados = array(
                     'codigo' => 1,
@@ -149,16 +137,9 @@ class M_sala extends CI_Model {
     public function alterar($codigo, $descricao, $andar, $capacidade) {
         try {
 
-            // Antes de alterar, verifica se a sala existe no banco
             $retornoConsulta = $this->consultarSala($codigo);
-
-            // Só altera se a sala estiver cadastrada (codigo 10 = sala existe e está ativa)
             if ($retornoConsulta['codigo'] == 10) {
-
-                // Inicia a query de atualização
                 $query = "update tbl_sala set ";
-
-                // Adiciona os campos dinamicamente, só se foram passados
                 if ($descricao !== '') {
                     $query .= "descricao = '$descricao', ";
                 }
@@ -170,14 +151,8 @@ class M_sala extends CI_Model {
                 if ($capacidade !== '') {
                     $query .= "capacidade = $capacidade, ";
                 }
-
-                // Remove a vírgula do final e adiciona o where
                 $queryFinal = rtrim($query, ", ") . " where codigo = $codigo";
-
-                // atualiza
                 $this->db->query($queryFinal);
-
-                // verifica se atualizou
                 if ($this->db->affected_rows() > 0) {
                     $dados = array(
                         'codigo' => 1,
@@ -191,7 +166,6 @@ class M_sala extends CI_Model {
                 }
 
             } else {
-                // Retorna o erro que veio do consultarSala (9 = desativada, 98 = não encontrada)
                 $dados = array(
                     'codigo' => $retornoConsulta['codigo'],
                     'msg'    => $retornoConsulta['msg']
@@ -199,31 +173,20 @@ class M_sala extends CI_Model {
             }
 
         } catch (Exception $e) {
-            // Captura qualquer erro inesperado
             $dados = array(
                 'codigo' => 0,
                 'msg'    => 'ATENÇÃO: O seguinte erro aconteceu -> ' . $e->getMessage()
             );
         }
-
-        // Retorna o resultado pro Controller
         return $dados;
     }
 
     public function desativar($codigo) {
         try {
-
-            // Antes de desativar, verifica se a sala existe no banco
             $retornoConsulta = $this->consultarSala($codigo);
-
-            // Só desativa se a sala estiver cadastrada e ativa (codigo 10 = sala existe)
             if ($retornoConsulta['codigo'] == 10) {
-
-                // Atualiza o estatus para 'D' (desativado) — não apaga o registro
                 $this->db->query("update tbl_sala set estatus = 'D'
                                   where codigo = $codigo");
-
-                // Verifica se a atualização ocorreu com sucesso
                 if ($this->db->affected_rows() > 0) {
                     $dados = array(
                         'codigo' => 1,
@@ -237,7 +200,6 @@ class M_sala extends CI_Model {
                 }
 
             } else {
-                // Retorna o erro que veio do consultarSala (9 = já desativada, 98 = não encontrada)
                 $dados = array(
                     'codigo' => $retornoConsulta['codigo'],
                     'msg'    => $retornoConsulta['msg']
@@ -245,14 +207,11 @@ class M_sala extends CI_Model {
             }
 
         } catch (Exception $e) {
-            // Captura qualquer erro inesperado
             $dados = array(
                 'codigo' => 0,
                 'msg'    => 'ATENÇÃO: O seguinte erro aconteceu -> ' . $e->getMessage()
             );
         }
-
-        // Retorna o resultado pro Controller
         return $dados;
     }
 }

@@ -23,7 +23,6 @@ class Sala extends CI_Controller {
     private $capacidade;
     private $estatus;
 
-    // Getters dos atributos (porta de saida, para ler o valor)
     public function getCodigo() {
         return $this->codigo;
     }
@@ -43,8 +42,6 @@ class Sala extends CI_Controller {
     public function getEstatus() {
         return $this->estatus;
     }
-
-    // Setters dos atributos (porta de entrada)
     public function setCodigo($codigoFront) {
         $this->codigo = $codigoFront;
     }
@@ -66,30 +63,21 @@ class Sala extends CI_Controller {
     }
     
     public function inserir() {
-        // Atributos para controlar o status do método
         $erros   = [];
         $sucesso = false;
 
         try {
-
-            // Lê o JSON enviado pelo Insomnia
             $json      = file_get_contents('php://input');
             $resultado = json_decode($json);
-
-            // Campos que esse método espera receber
             $lista = [
                 "codigo"    => '0',
                 "descricao" => '0',
                 "andar"     => '0',
                 "capacidade"=> '0'
             ];
-
-            // Verifica se os campos do Front batem com os esperados
             if (verificarParam($resultado, $lista) != 1) {
                 $erros[] = ['codigo' => 99, 'msg' => 'Campos inexistentes ou incorretos no FrontEnd.'];
             } else {
-
-                // Valida cada campo individualmente
                 $retornoCodigo     = validarDados($resultado->codigo,     'int',    true);
                 $retornoDescricao  = validarDados($resultado->descricao,  'string', true);
                 $retornoAndar      = validarDados($resultado->andar,      'int',    true);
@@ -118,8 +106,6 @@ class Sala extends CI_Controller {
                                 'campo'  => 'Capacidade',
                                 'msg'    => $retornoCapacidade['msg']];
                 }
-
-                // Se não encontrar erros, manda pro Model
                 if (empty($erros)) {
                     $this->setCodigo($resultado->codigo);
                     $this->setDescricao($resultado->descricao);
@@ -148,43 +134,30 @@ class Sala extends CI_Controller {
         } catch (Exception $e) {
             $erros[] = ['codigo' => 0, 'msg' => 'Erro inesperado: ' . $e->getMessage()];
         }
-
-        // Monta o retorno
         if ($sucesso == true) {
             $retorno = ['sucesso' => $sucesso, 'msg' => 'Sala cadastrada corretamente.'];
         } else {
             $retorno = ['sucesso' => $sucesso, 'erros' => $erros];
         }
-
-        // Transforma em JSON e retorna
         echo json_encode($retorno);
     }
 
     public function consultar() {
-        // Atributos para controlar o status do método
         $erros   = [];
         $sucesso = false;
 
         try {
-
-            // Lê o JSON enviado pelo Insomnia
             $json      = file_get_contents('php://input');
             $resultado = json_decode($json);
-
-            // Campos que esse método espera receber
             $lista = [
                 "codigo"     => '0',
                 "descricao"  => '0',
                 "andar"      => '0',
                 "capacidade" => '0'
             ];
-
-            // Verifica se os campos do Front batem com os esperados
             if (verificarParam($resultado, $lista) != 1) {
                 $erros[] = ['codigo' => 99, 'msg' => 'Campos inexistentes ou incorretos no FrontEnd.'];
             } else {
-
-                // Valida cada campo individualmente (consulta aceita vazio)
                 $retornoCodigo     = validarDadosConsulta($resultado->codigo,     'int');
                 $retornoDescricao  = validarDadosConsulta($resultado->descricao,  'string');
                 $retornoAndar      = validarDadosConsulta($resultado->andar,      'int');
@@ -213,8 +186,6 @@ class Sala extends CI_Controller {
                                 'campo'  => 'Capacidade',
                                 'msg'    => $retornoCapacidade['msg']];
                 }
-
-                // Se não encontrar erros, manda pro Model
                 if (empty($erros)) {
                     $this->setCodigo($resultado->codigo);
                     $this->setDescricao($resultado->descricao);
@@ -243,8 +214,6 @@ class Sala extends CI_Controller {
         } catch (Exception $e) {
             $erros[] = ['codigo' => 0, 'msg' => 'Erro inesperado: ' . $e->getMessage()];
         }
-
-        // Monta o retorno
         if ($sucesso == true) {
             $retorno = ['sucesso' => $sucesso, 'codigo' => $resBanco['codigo'],
                         'msg'    => $resBanco['msg'],
@@ -252,8 +221,6 @@ class Sala extends CI_Controller {
         } else {
             $retorno = ['sucesso' => $sucesso, 'erros' => $erros];
         }
-
-        // Transforma em JSON e retorna
         echo json_encode($retorno);
     }
 
@@ -264,31 +231,22 @@ class Sala extends CI_Controller {
 
         try {
 
-            // Lê o JSON enviado pelo Insomnia
             $json      = file_get_contents('php://input');
             $resultado = json_decode($json);
-
-            // Campos que esse método espera receber
             $lista = [
                 "codigo"     => '0',
                 "descricao"  => '0',
                 "andar"      => '0',
                 "capacidade" => '0'
             ];
-
-            // Verifica se os campos do Front batem com os esperados
             if (verificarParam($resultado, $lista) != 1) {
                 $erros[] = ['codigo' => 99, 'msg' => 'Campos inexistentes ou incorretos no FrontEnd.'];
             } else {
-
-                // Pelo menos um dos três parâmetros precisa ter dados
                 if (trim($resultado->descricao) == '' &&
                     trim($resultado->andar)      == '' &&
                     trim($resultado->capacidade) == '') {
                     $erros[] = ['codigo' => 12, 'msg' => 'Pelo menos um parâmetro precisa ser passado para atualização.'];
                 } else {
-
-                    // Valida cada campo
                     $retornoCodigo     = validarDados($resultado->codigo,          'int',    true);
                     $retornoDescricao  = validarDadosConsulta($resultado->descricao,  'string');
                     $retornoAndar      = validarDadosConsulta($resultado->andar,      'int');
@@ -317,8 +275,6 @@ class Sala extends CI_Controller {
                                     'campo'  => 'Capacidade',
                                     'msg'    => $retornoCapacidade['msg']];
                     }
-
-                    // Se não encontrar erros, manda pro Model
                     if (empty($erros)) {
                         $this->setCodigo($resultado->codigo);
                         $this->setDescricao($resultado->descricao);
@@ -348,19 +304,15 @@ class Sala extends CI_Controller {
         } catch (Exception $e) {
             $erros[] = ['codigo' => 0, 'msg' => 'Erro inesperado: ' . $e->getMessage()];
         }
-
-        // Monta o retorno
         if ($sucesso == true) {
             $retorno = ['sucesso' => $sucesso, 'codigo' => $resBanco['codigo'],
                         'msg'    => $resBanco['msg']];
         } else {
             $retorno = ['sucesso' => $sucesso, 'erros' => $erros];
         }
-
-        // Transforma em JSON e retorna
         echo json_encode($retorno);
     }
-    
+
     public function desativar() {
         $erros   = [];
         $sucesso = false;
